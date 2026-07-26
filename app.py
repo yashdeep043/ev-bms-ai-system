@@ -238,30 +238,76 @@ st.markdown(f"""
         font-weight: 800 !important;
     }}
 
-    /* Target Selectbox & Popovers */
+    /* --------------------------------------------------------- */
+    /* FOOLPROOF BASEWEB SELECTBOX & DROPDOWN MENU CONTRAST FIX  */
+    /* --------------------------------------------------------- */
     [data-baseweb="select"] > div {{
         background-color: {bg_card} !important;
-        border-color: {border_card} !important;
+        border: 1.5px solid {border_card} !important;
+        color: {text_main} !important;
     }}
 
-    [data-baseweb="select"] p,
     [data-baseweb="select"] span,
+    [data-baseweb="select"] p,
     [data-baseweb="select"] div {{
         color: {text_main} !important;
+        font-weight: 700 !important;
     }}
 
-    [data-baseweb="popover"],
-    [data-baseweb="menu"],
-    [role="listbox"] {{
+    /* Selectbox Dropdown Menu Popover */
+    div[data-baseweb="popover"],
+    ul[role="listbox"],
+    div[data-baseweb="menu"] {{
         background-color: {bg_card} !important;
-        border: 1px solid {border_card} !important;
+        border: 1.5px solid {border_card} !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
     }}
 
-    [data-baseweb="menu"] li p,
-    [data-baseweb="menu"] li span,
-    [role="option"] p,
-    [role="option"] span {{
+    /* Individual Unselected Options in Dropdown List */
+    div[data-baseweb="popover"] li,
+    div[data-baseweb="popover"] [role="option"],
+    div[data-baseweb="menu"] li,
+    ul[role="listbox"] li,
+    ul[role="listbox"] [role="option"] {{
+        background-color: {bg_card} !important;
         color: {text_main} !important;
+    }}
+
+    /* Target ALL Option Text Nodes Inside Dropdown Popover */
+    div[data-baseweb="popover"] li *,
+    div[data-baseweb="popover"] [role="option"] *,
+    div[data-baseweb="menu"] li *,
+    ul[role="listbox"] li *,
+    ul[role="listbox"] [role="option"] * {{
+        color: {text_main} !important;
+        font-weight: 700 !important;
+    }}
+
+    /* Hovered Option Item */
+    div[data-baseweb="popover"] li:hover,
+    div[data-baseweb="popover"] [role="option"]:hover,
+    ul[role="listbox"] li:hover,
+    ul[role="listbox"] [role="option"]:hover {{
+        background-color: {tab_hover_bg} !important;
+    }}
+    
+    div[data-baseweb="popover"] li:hover *,
+    div[data-baseweb="popover"] [role="option"]:hover *,
+    ul[role="listbox"] li:hover *,
+    ul[role="listbox"] [role="option"]:hover * {{
+        color: #2563eb !important;
+    }}
+
+    /* Selected Option Item */
+    div[data-baseweb="popover"] [aria-selected="true"],
+    ul[role="listbox"] [aria-selected="true"] {{
+        background-color: #2563eb !important;
+    }}
+
+    div[data-baseweb="popover"] [aria-selected="true"] *,
+    ul[role="listbox"] [aria-selected="true"] * {{
+        color: #ffffff !important;
+        font-weight: 800 !important;
     }}
 
     /* Target Navigation Tabs */
