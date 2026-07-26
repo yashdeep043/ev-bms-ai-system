@@ -496,11 +496,12 @@ render_top_metrics()
 # ---------------------------------------------------------
 # STATIC TABS CONTAINER
 # ---------------------------------------------------------
-tab_cells, tab_physics, tab_ai, tab_forecast = st.tabs([
+tab_cells, tab_physics, tab_ai, tab_forecast, tab_charging = st.tabs([
     "🔋 Physical 4S Cell Grid",
     "⚡ Electro-Thermal Simulator",
     "🚨 Thermal Runaway AI Radar",
-    "🔮 Capacity Decay & RUL Prediction"
+    "🔮 Capacity Decay & RUL Prediction",
+    "⚡ AI Smart Charging Optimizer"
 ])
 
 # ---------------------------------------------------------
@@ -828,3 +829,82 @@ with tab_forecast:
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# TAB 5: AI SMART CHARGING OPTIMIZER & CC-CV PROFILE
+# ---------------------------------------------------------
+with tab_charging:
+    st.markdown("##### ⚡ AI Smart Fast-Charging Optimizer & CC-CV Strategy Engine")
+    
+    col_c1, col_c2, col_c3 = st.columns([1.3, 1, 1])
+    with col_c1:
+        strategy_sel = st.selectbox(
+            "⚡ Charging Strategy",
+            [
+                "Balanced Fast Charge ⚖️ (Adaptive C-Rate)",
+                "Ultra Fast Charge ⚡ (Max Speed + Pre-Cooling)",
+                "Eco Health Saver 🌱 (Degradation Minimizer)"
+            ],
+            key="charging_strategy_select"
+        )
+    with col_c2:
+        start_soc = st.slider("Current Battery SoC (%)", 5, 85, 20, 5, key="charge_start_soc")
+    with col_c3:
+        target_soc = st.slider("Target Battery SoC (%)", 50, 100, 80, 5, key="charge_target_soc")
+
+    df_bms_live = db.get_recent_bms_telemetry(limit=10)
+    live_pkt = df_bms_live.iloc[0] if len(df_bms_live) > 0 else {}
+    live_temp = live_pkt.get('temp_c', 25.0)
+    live_soh = live_pkt.get('soh_pct', 98.0)
+    
+    df_chg, chg_meta = EVBatteryAI().calculate_optimal_charging_profile(
+        current_soc=start_soc,
+        target_soc=target_soc,
+        temp_c=live_temp,
+        soh_pct=live_soh,
+        strategy=strategy_sel
+    )
+
+    k_c1, k_c2, k_c3, k_c4 = st.columns(4)
+    with k_c1:
+        st.metric("Max Safe Charge Current", f"{chg_meta['max_charge_current_a']} A", delta=f"{chg_meta['effective_c_rate']}C Rate")
+    with k_c2:
+        st.metric("Est. Time to 80% Fast Charge", f"{chg_meta['time_to_80_min']} Min")
+    with k_c3:
+        st.metric("Est. Time to Target SoC", f"{chg_meta['time_to_100_min']} Min")
+    with k_c4:
+        st.metric("Lithium Plating & Thermal Risk", f"{chg_meta['plating_risk']}")
+
+    st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
+    
+    col_chg_left, col_chg_right = st.columns([1.5, 1.5])
+    
+    with col_chg_left:
+        st.markdown("###### 📈 Dynamic CC-CV Charging Profile (Current & Voltage Taper)")
+        fig_cc_cv = go.Figure()
+        fig_cc_cv.add_trace(go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Charge Current (A)'], name="Current (A)", line=dict(color="#2563eb", width=2.5)))
+        fig_cc_cv.add_trace(go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Pack Voltage (V)'], name="Voltage (V)", yaxis="y2", line=dict(color="#ef4444", width=2.5, dash="dash")))
+        
+        fig_cc_cv = style_plotly_fig(fig_cc_cv, is_dark_mode, height=220)
+        fig_cc_cv.update_layout(
+            yaxis2=dict(title="Voltage (V)", overlaying="y", side="right", font=dict(color=plotly_font_color)),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(fig_cc_cv, use_container_width=True, key="chart_cc_cv_profile")
+
+    with col_chg_right:
+        st.markdown("###### 🔋 State-of-Charge (SoC %) Progression Curve")
+        fig_soc_p = px.area(df_chg, x='Time (Min)', y='SoC (%)', color_discrete_sequence=['#22c55e'])
+        fig_soc_p = style_plotly_fig(fig_soc_p, is_dark_mode, height=220)
+        st.plotly_chart(fig_soc_p, use_container_width=True, key="chart_soc_progression")
+
+    st.markdown(f"""
+    <div class="bms-card" style="padding:10px 12px; margin-top:4px;">
+        <div class="bms-card-label">AI Charging Optimization & Longevity Protocol</div>
+        <p style="font-size:0.78rem; font-weight:700; color:{text_main}; margin:4px 0 0 0; line-height:1.4;">
+            Strategy: <b>{strategy_sel}</b> • Max Rate: <b>{chg_meta['effective_c_rate']}C ({chg_meta['max_charge_current_a']}A)</b><br>
+            Thermal Status: <b>{live_temp}°C</b> ({"Derated for Thermal Protection" if chg_meta['temp_derated'] else "Optimal Operating Window"})<br>
+            Recommendation: Stopping bulk charge at <b>80% SoC</b> extends total cycle lifetime by <b>+45%</b> (reducing high-voltage oxidation).
+        </p>
+    </div>
+    """, unsafe_allow_html=True)

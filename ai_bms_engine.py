@@ -129,6 +129,90 @@ class EVBatteryAI:
         else:
             return "none", "🛑 Passive Convection (12% Heat Removal)", f"NOMINAL TEMP ({effective_temp:.1f}°C) • Energy Saver Passive Mode"
 
+    def calculate_optimal_charging_profile(self, current_soc=20.0, target_soc=80.0, temp_c=25.0, soh_pct=98.0, strategy="Balanced Fast Charge ⚖️"):
+        """
+        AI Intelligent Charging Optimizer:
+        Calculates optimal CC-CV charging profile, safe C-rate, time to 80%/100%, and lithium plating risk.
+        """
+        pack_capacity_ah = 50.0  # 50Ah 4S pack
+        
+        # Strategy Base Multipliers
+        if "Ultra Fast" in strategy:
+            base_c_rate = 1.8
+        elif "Eco" in strategy:
+            base_c_rate = 0.6
+        else:
+            base_c_rate = 1.2
+            
+        # Temperature & SOH Derating Filters
+        temp_derate = 1.0
+        if temp_c > 45.0:
+            temp_derate = 0.4  # Severe derate to prevent thermal runaway
+        elif temp_c > 38.0:
+            temp_derate = 0.7  # Moderate derate
+        elif temp_c < 10.0:
+            temp_derate = 0.5  # Derate for lithium plating prevention at low temp
+            
+        soh_derate = max(0.6, soh_pct / 100.0)
+        
+        effective_c_rate = round(base_c_rate * temp_derate * soh_derate, 2)
+        max_charge_current_a = round(effective_c_rate * pack_capacity_ah, 1)
+        
+        # Calculate Time to 80% & 100%
+        delta_soc_80 = max(0.0, min(80.0, target_soc) - min(current_soc, 80.0))
+        delta_soc_100 = max(0.0, target_soc - min(current_soc, target_soc))
+        
+        time_to_80_min = round((delta_soc_80 / 100.0) * (60.0 / max(0.1, effective_c_rate)), 1)
+        time_to_100_min = round(time_to_80_min + (max(0.0, target_soc - 80.0) / 100.0) * (60.0 / max(0.1, effective_c_rate * 0.4)), 1)
+        
+        # Generate Synthetic CC-CV Curve Data Points
+        time_axis = np.linspace(0, max(1.0, time_to_100_min), 40)
+        soc_curve = []
+        current_curve = []
+        voltage_curve = []
+        
+        for t in time_axis:
+            if time_to_100_min == 0:
+                soc_val = target_soc
+            else:
+                progress = t / time_to_100_min
+                soc_val = current_soc + (target_soc - current_soc) * (1.0 - np.exp(-2.5 * progress)) / (1.0 - np.exp(-2.5))
+                
+            soc_val = min(target_soc, soc_val)
+            soc_curve.append(round(soc_val, 1))
+            
+            # CC Stage (0-80%) vs CV Stage (80-100%)
+            if soc_val < 80.0:
+                curr_val = max_charge_current_a
+                v_val = 12.8 + (soc_val / 100.0) * 2.8
+            else:
+                taper = max(0.15, (100.0 - soc_val) / 20.0)
+                curr_val = max_charge_current_a * taper
+                v_val = 15.6  # CV Constant Voltage Cap
+                
+            current_curve.append(round(curr_val, 1))
+            voltage_curve.append(round(v_val, 2))
+            
+        df_cc_cv = pd.DataFrame({
+            'Time (Min)': np.round(time_axis, 1),
+            'SoC (%)': soc_curve,
+            'Charge Current (A)': current_curve,
+            'Pack Voltage (V)': voltage_curve
+        })
+        
+        plating_risk = "LOW 🟢" if temp_c >= 15.0 and effective_c_rate <= 1.5 else ("MEDIUM 🟡" if temp_c >= 10.0 else "HIGH 🔴 (Cold Temperature)")
+        
+        meta = {
+            'effective_c_rate': effective_c_rate,
+            'max_charge_current_a': max_charge_current_a,
+            'time_to_80_min': time_to_80_min,
+            'time_to_100_min': time_to_100_min,
+            'plating_risk': plating_risk,
+            'temp_derated': temp_derate < 1.0
+        }
+        
+        return df_cc_cv, meta
+
 if __name__ == "__main__":
     ai = EVBatteryAI()
     sample_pkt = {'cell_v1': 3.7, 'cell_v2': 3.7, 'cell_v3': 3.7, 'cell_v4': 3.2, 'temp_c': 64.5, 'int_resistance_mOhm': 24.5}
