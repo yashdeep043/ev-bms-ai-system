@@ -84,7 +84,7 @@ with col_h5:
 run_interval = refresh_interval_sec if live_stream else None
 hz_rate = round(1.0 / refresh_interval_sec, 1) if live_stream else 0.0
 
-# Dynamic Theme Tokens & Palette
+# Dynamic Theme Tokens & Palette (Strict High-Contrast Bounds)
 if is_dark_mode:
     bg_app = "#0b0f19"
     bg_card = "#172033"
@@ -92,7 +92,7 @@ if is_dark_mode:
     text_title = "#ffffff"
     text_main = "#f8fafc"
     text_sub = "#94a3b8"
-    text_card_label = "#cbd5e1"
+    text_val = "#60a5fa"
     text_optimal = "#4ade80"
     tab_bg = "#172033"
     tab_text = "#cbd5e1"
@@ -106,7 +106,7 @@ else:
     text_title = "#0f172a"
     text_main = "#0f172a"
     text_sub = "#475569"
-    text_card_label = "#475569"
+    text_val = "#2563eb"
     text_optimal = "#16a34a"
     tab_bg = "#ffffff"
     tab_text = "#334155"
@@ -132,10 +132,10 @@ st.markdown(f"""
     }}
     
     .block-container {{
-        padding-top: 1.2rem !important;
+        padding-top: 1.0rem !important;
         padding-bottom: 0.5rem !important;
-        padding-left: 1.2rem !important;
-        padding-right: 1.2rem !important;
+        padding-left: 1.0rem !important;
+        padding-right: 1.0rem !important;
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 auto !important;
@@ -160,9 +160,14 @@ st.markdown(f"""
     .stMarkdown p, .stMarkdown span, .stMarkdown div,
     [data-testid="stMarkdownContainer"] p,
     [data-testid="stMarkdownContainer"] span,
+    [data-testid="stMarkdownContainer"] div {{
+        color: {text_main} !important;
+    }}
+
     [data-testid="stCaptionContainer"] p,
     [data-testid="stCaptionContainer"] span {{
-        color: {text_main} !important;
+        color: {text_sub} !important;
+        font-weight: 600 !important;
     }}
 
     /* Target Widget Labels (Slider, Toggle, Selectbox, Radio) */
@@ -211,23 +216,25 @@ st.markdown(f"""
     [data-testid="stMetric"] {{
         background: {bg_card} !important;
         border: 1.5px solid {border_card} !important;
-        border-radius: 10px !important;
-        padding: 8px 10px !important;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 8px !important;
+        padding: 6px 8px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }}
 
     [data-testid="stMetricLabel"] p,
     [data-testid="stMetricLabel"] span {{
         color: {text_sub} !important;
         font-weight: 700 !important;
-        font-size: 0.72rem !important;
+        font-size: 0.68rem !important;
         text-transform: uppercase !important;
     }}
 
     [data-testid="stMetricValue"] div,
     [data-testid="stMetricValue"] span {{
         color: {text_main} !important;
-        font-size: clamp(1.0rem, 1.3vw, 1.4rem) !important;
+        font-size: clamp(0.95rem, 1.2vw, 1.25rem) !important;
         font-weight: 800 !important;
     }}
 
@@ -263,7 +270,7 @@ st.markdown(f"""
         background-color: transparent !important;
         border-bottom: 2px solid {border_card} !important;
         padding-bottom: 2px !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 6px !important;
         flex-wrap: wrap !important;
     }}
     
@@ -271,13 +278,13 @@ st.markdown(f"""
         background-color: {tab_bg} !important;
         border: 1.5px solid {border_card} !important;
         border-radius: 8px 8px 0px 0px !important;
-        padding: 6px 14px !important;
+        padding: 5px 12px !important;
     }}
     
     [data-baseweb="tab"] p, button[role="tab"] p {{
         color: {tab_text} !important;
         font-weight: 700 !important;
-        font-size: 0.88rem !important;
+        font-size: 0.85rem !important;
     }}
 
     [aria-selected="true"], button[role="tab"][aria-selected="true"] {{
@@ -298,8 +305,7 @@ st.markdown(f"""
     }}
 
     [data-testid="stExpander"] summary p,
-    [data-testid="stExpander"] summary span,
-    [data-testid="stExpander"] p {{
+    [data-testid="stExpander"] summary span {{
         color: {text_main} !important;
         font-weight: 700 !important;
     }}
@@ -327,7 +333,7 @@ st.markdown(f"""
     .bms-card-val {{
         font-size: clamp(1.0rem, 1.3vw, 1.4rem);
         font-weight: 800;
-        color: #2563eb;
+        color: {text_val};
         margin-top: 2px;
     }}
     
@@ -347,7 +353,7 @@ st.markdown(f"""
     .cell-volts {{
         font-size: clamp(1.0rem, 1.3vw, 1.4rem);
         font-weight: 800;
-        color: #2563eb;
+        color: {text_val};
     }}
 
     .author-pill {{
@@ -373,7 +379,7 @@ st.markdown(f"""
 # Floating Author Signature
 st.markdown('<div class="author-pill"><b> Developed by</b> Yashdeep</div>', unsafe_allow_html=True)
 
-st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # FRAGMENT 1: TOP METRICS BAR & LIVE STATUS INDICATOR
@@ -406,13 +412,13 @@ def render_top_metrics():
     if latest is not None:
         m1, m2, m3, m4, m5 = st.columns(5)
         with m1:
-            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Pack Voltage</div><div class="bms-card-val" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["pack_voltage"]} V</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Pack Voltage</div><div class="bms-card-val" style="color:{text_val};">{latest["pack_voltage"]} V</div></div>', unsafe_allow_html=True)
         with m2:
-            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Pack Current</div><div class="bms-card-val" style="color:{"#f87171" if latest["pack_current_a"]<-40 else ("#60a5fa" if is_dark_mode else "#2563eb")};">{latest["pack_current_a"]} A</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Pack Current</div><div class="bms-card-val" style="color:{"#f87171" if latest["pack_current_a"]<-40 else text_val};">{latest["pack_current_a"]} A</div></div>', unsafe_allow_html=True)
         with m3:
             st.markdown(f'<div class="bms-card"><div class="bms-card-label">Cell Temperature</div><div class="bms-card-val" style="color:{"#f87171" if latest["temp_c"]>50 else text_optimal};">{latest["temp_c"]} °C</div></div>', unsafe_allow_html=True)
         with m4:
-            st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Charge</div><div class="bms-card-val" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["soc_pct"]} %</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Charge</div><div class="bms-card-val" style="color:{text_val};">{latest["soc_pct"]} %</div></div>', unsafe_allow_html=True)
         with m5:
             st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Health</div><div class="bms-card-val" style="color:{text_optimal};">{latest["soh_pct"]} %</div></div>', unsafe_allow_html=True)
 
@@ -441,14 +447,14 @@ with tab_cells:
             
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #1</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v1"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #1</div><div class="cell-volts" style="color:{text_val};">{latest["cell_v1"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #2</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v2"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #2</div><div class="cell-volts" style="color:{text_val};">{latest["cell_v2"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #3</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v3"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #3</div><div class="cell-volts" style="color:{text_val};">{latest["cell_v3"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c4:
                 delta = abs(latest["cell_v1"] - latest["cell_v4"])
-                st.markdown(f'<div class="cell-grid-card" style="border-color:{"#ef4444" if delta>0.1 else border_card};"><div class="cell-num">CELL #4</div><div class="cell-volts" style="color:{"#ef4444" if delta>0.1 else ("#60a5fa" if is_dark_mode else "#2563eb")};">{latest["cell_v4"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{"#ef4444" if delta>0.1 else text_optimal}; margin:2px 0 0 0;">{"Imbalance 🔴" if delta>0.1 else "Optimal 🟢"}</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card" style="border-color:{"#ef4444" if delta>0.1 else border_card};"><div class="cell-num">CELL #4</div><div class="cell-volts" style="color:{"#ef4444" if delta>0.1 else text_val};">{latest["cell_v4"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{"#ef4444" if delta>0.1 else text_optimal}; margin:2px 0 0 0;">{"Imbalance 🔴" if delta>0.1 else "Optimal 🟢"}</p></div>', unsafe_allow_html=True)
                 
             st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
             
@@ -506,72 +512,67 @@ with tab_cells:
     render_tab_cells()
 
 # ---------------------------------------------------------
-# TAB 2: ADVANCED ELECTRO-THERMAL SIMULATOR & COOLING LAB (WITH AI AUTO-COOLING)
+# TAB 2: ADVANCED ELECTRO-THERMAL SIMULATOR & COOLING LAB (COMPACT & FULLY ON-SCREEN)
 # ---------------------------------------------------------
 with tab_physics:
     st.markdown("##### ⚡ Advanced Electro-Thermal Simulator & Thermal Management Lab")
     
-    cool_sel = st.radio(
-        "🧊 Select Thermal Management Cooling Mode",
-        [
-            "🤖 AI Autonomous Auto-Cooling (Dynamic Temp Tracking)",
-            "💧 Active Liquid Cooling (82% Heat Removal)",
-            "🌀 Forced Air Fan Cooling (48% Heat Removal)",
-            "🛑 Passive Convection (12% Heat Removal)"
-        ],
-        horizontal=True,
-        key="cooling_mode_radio"
-    )
-
-    st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
+    col_ctrl1, col_ctrl2, col_ctrl3, col_ctrl4 = st.columns([1.3, 0.9, 0.9, 0.9])
     
-    c_s1, c_s2, c_s3 = st.columns(3)
-    with c_s1:
+    with col_ctrl1:
+        cool_sel = st.selectbox(
+            "🧊 Cooling Mode",
+            [
+                "🤖 AI Autonomous Auto-Cooling",
+                "💧 Active Liquid Cooling (82%)",
+                "🌀 Forced Air Fan Cooling (48%)",
+                "🛑 Passive Convection (12%)"
+            ],
+            key="cooling_mode_select"
+        )
+    with col_ctrl2:
         curr_draw = st.slider("Current Draw (A)", -100.0, 100.0, -40.0, 5.0, help="Discharge (-100A) / Charge (+100A)")
-    with c_s2:
-        imb_factor = st.slider("Cell Imbalance Factor", 0.0, 1.0, 0.3, 0.1)
-    with c_s3:
+    with col_ctrl3:
+        imb_factor = st.slider("Cell Imbalance", 0.0, 1.0, 0.3, 0.1)
+    with col_ctrl4:
         amb_temp = st.slider("Ambient Temp (°C)", -10.0, 50.0, 25.0, 1.0)
 
     ai_controller_msg = ""
     if "AI Autonomous" in cool_sel:
-        # Pre-estimate cell temp to select dynamic AI cooling mode
         est_sim = pack_sim.simulate_pack_state(current_a=curr_draw, ambient_temp=amb_temp, cell_imbalance_factor=imb_factor, cooling_mode="none")
         cool_mode, mode_name, ai_controller_msg = ai_engine.select_optimal_cooling_mode(temp_c=est_sim['temp_c'], ambient_temp=amb_temp)
+        st.markdown(f'<div style="background:{bg_card}; border:1px solid #2563eb; border-radius:6px; padding:4px 10px; margin-bottom:4px; font-size:0.78rem; font-weight:700; color:{text_main};">🤖 <b>AI Thermal Controller</b>: Dynamically selected <b>{cool_mode.upper()}</b> mode — {ai_controller_msg}</div>', unsafe_allow_html=True)
     elif "Liquid" in cool_sel:
         cool_mode = "liquid"
     elif "Air" in cool_sel:
         cool_mode = "air"
     else:
         cool_mode = "none"
-        
-    if "AI Autonomous" in cool_sel:
-        st.info(f"🤖 **AI Thermal Controller Active**: Dynamically selected **{cool_mode.upper()}** mode — {ai_controller_msg}")
 
     sim_res = BatteryPackSimulator().simulate_pack_state(current_a=curr_draw, ambient_temp=amb_temp, cell_imbalance_factor=imb_factor, cooling_mode=cool_mode)
     
     p1, p2, p3, p4, p5, p6 = st.columns(6)
     with p1:
-        st.metric("Voltage Delta (ΔV)", f"{sim_res['delta_v_mv']} mV")
+        st.metric("Voltage Delta", f"{sim_res['delta_v_mv']} mV")
     with p2:
         st.metric("Joule Heat Gen", f"{sim_res['joule_heat_watts']} W")
     with p3:
         st.metric("Cooling Removed", f"{sim_res['cooling_removal_watts']} W", delta=f"{sim_res['cooling_efficiency_pct']}% Eff")
     with p4:
-        st.metric("Net Thermal Accum.", f"{sim_res['net_heat_watts']} W")
+        st.metric("Net Accumulation", f"{sim_res['net_heat_watts']} W")
     with p5:
-        st.metric("Pack Equilibrium Temp", f"{sim_res['temp_c']} °C")
+        st.metric("Equilibrium Temp", f"{sim_res['temp_c']} °C")
     with p6:
         st.metric("Balancing Circuit", "ACTIVE 🟢" if sim_res['balancing_active'] else "NORMAL ⚪")
 
-    st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
     
-    col_sim_g1, col_sim_g2 = st.columns([1.5, 1.5])
+    col_sim_g1, col_sim_g2 = st.columns([1, 1])
     
     with col_sim_g1:
         st.markdown("###### 🔋 Simulated 4S Individual Cell Voltages")
         cell_df = pd.DataFrame({
-            'Cell': ['Cell #1', 'Cell #2', 'Cell #3', 'Cell #4 (Imbalanced)'],
+            'Cell': ['Cell #1', 'Cell #2', 'Cell #3', 'Cell #4 (Imbal)'],
             'Voltage (V)': [sim_res['cell_v1'], sim_res['cell_v2'], sim_res['cell_v3'], sim_res['cell_v4']]
         })
         fig_sim_cells = px.bar(
@@ -580,7 +581,7 @@ with tab_physics:
             range_y=[2.5, 4.3]
         )
         fig_sim_cells.update_layout(
-            template=plotly_template, height=230, margin={"t": 10, "b": 10, "l": 10, "r": 10},
+            template=plotly_template, height=200, margin={"t": 15, "b": 25, "l": 10, "r": 10},
             coloraxis_showscale=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color=plotly_font_color)
         )
@@ -589,7 +590,7 @@ with tab_physics:
     with col_sim_g2:
         st.markdown("###### 🔥 Thermal Power Balance Breakdown (Watts)")
         thermal_df = pd.DataFrame({
-            'Thermal Component': ['Joule Heat Generated', 'Cooling Heat Removed', 'Net Heat Retained'],
+            'Thermal Component': ['Joule Heat', 'Cooling Removed', 'Net Retained'],
             'Power (Watts)': [sim_res['joule_heat_watts'], sim_res['cooling_removal_watts'], sim_res['net_heat_watts']],
             'Category': ['Gen', 'Cool', 'Net']
         })
@@ -598,7 +599,7 @@ with tab_physics:
             color_discrete_map={'Gen': '#ef4444', 'Cool': '#3b82f6', 'Net': '#f59e0b'}
         )
         fig_sim_heat.update_layout(
-            template=plotly_template, height=230, margin={"t": 10, "b": 10, "l": 10, "r": 10},
+            template=plotly_template, height=200, margin={"t": 15, "b": 25, "l": 10, "r": 10},
             showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color=plotly_font_color)
         )
