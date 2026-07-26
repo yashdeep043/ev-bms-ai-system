@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import time
 import os
 import importlib
@@ -854,8 +855,8 @@ with tab_charging:
 
     df_bms_live = db.get_recent_bms_telemetry(limit=10)
     live_pkt = df_bms_live.iloc[0] if len(df_bms_live) > 0 else {}
-    live_temp = live_pkt.get('temp_c', 25.0)
-    live_soh = live_pkt.get('soh_pct', 98.0)
+    live_temp = live_pkt.get('temp_c', 25.0) if hasattr(live_pkt, 'get') else 25.0
+    live_soh = live_pkt.get('soh_pct', 98.0) if hasattr(live_pkt, 'get') else 98.0
     
     df_chg, chg_meta = EVBatteryAI().calculate_optimal_charging_profile(
         current_soc=start_soc,
@@ -881,15 +882,21 @@ with tab_charging:
     
     with col_chg_left:
         st.markdown("###### 📈 Dynamic CC-CV Charging Profile (Current & Voltage Taper)")
-        fig_cc_cv = go.Figure()
-        fig_cc_cv.add_trace(go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Charge Current (A)'], name="Current (A)", line=dict(color="#2563eb", width=2.5)))
-        fig_cc_cv.add_trace(go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Pack Voltage (V)'], name="Voltage (V)", yaxis="y2", line=dict(color="#ef4444", width=2.5, dash="dash")))
+        fig_cc_cv = make_subplots(specs=[[{"secondary_y": True}]])
+        fig_cc_cv.add_trace(
+            go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Charge Current (A)'], name="Current (A)", line=dict(color="#2563eb", width=2.5)),
+            secondary_y=False
+        )
+        fig_cc_cv.add_trace(
+            go.Scatter(x=df_chg['Time (Min)'], y=df_chg['Pack Voltage (V)'], name="Voltage (V)", line=dict(color="#ef4444", width=2.5, dash="dash")),
+            secondary_y=True
+        )
         
         fig_cc_cv = style_plotly_fig(fig_cc_cv, is_dark_mode, height=220)
-        fig_cc_cv.update_layout(
-            yaxis2=dict(title="Voltage (V)", overlaying="y", side="right", font=dict(color=plotly_font_color)),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
+        fig_cc_cv.update_yaxes(title_text="Current (A)", secondary_y=False)
+        fig_cc_cv.update_yaxes(title_text="Voltage (V)", secondary_y=True)
+        fig_cc_cv.update_xaxes(title_text="Time (Min)")
+        fig_cc_cv.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
         st.plotly_chart(fig_cc_cv, use_container_width=True, key="chart_cc_cv_profile")
 
     with col_chg_right:
