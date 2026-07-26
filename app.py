@@ -53,7 +53,7 @@ pack_sim, ai_engine = setup_bms_engine()
 # ---------------------------------------------------------
 # TOP STATIC BRAND HEADER & CONTROL BAR
 # ---------------------------------------------------------
-col_h1, col_h2, col_h3, col_h4, col_h5 = st.columns([2.2, 0.9, 1.1, 0.9, 0.9])
+col_h1, col_h2, col_h3, col_h4, col_h5 = st.columns([2.0, 0.9, 1.1, 0.9, 0.9])
 
 with col_h1:
     st.markdown('<h3 style="font-weight:800; margin:0; font-size:1.4rem;">⚡ EV BATTERY INTELLIGENCE PLATFORM</h3>', unsafe_allow_html=True)
@@ -84,19 +84,20 @@ with col_h5:
 run_interval = refresh_interval_sec if live_stream else None
 hz_rate = round(1.0 / refresh_interval_sec, 1) if live_stream else 0.0
 
-# Dynamic Theme Tokens
+# Dynamic Theme Tokens & Palette
 if is_dark_mode:
     bg_app = "#0b0f19"
     bg_card = "#172033"
     border_card = "#2a3754"
-    text_title = "#f8fafc"
-    text_main = "#f1f5f9"
+    text_title = "#ffffff"
+    text_main = "#f8fafc"
     text_sub = "#94a3b8"
     text_card_label = "#cbd5e1"
     tab_bg = "#172033"
     tab_text = "#cbd5e1"
     tab_hover_bg = "#2a3754"
     plotly_template = "plotly_dark"
+    plotly_font_color = "#f8fafc"
 else:
     bg_app = "#f8fafc"
     bg_card = "#ffffff"
@@ -109,8 +110,9 @@ else:
     tab_text = "#334155"
     tab_hover_bg = "#eff6ff"
     plotly_template = "plotly_white"
+    plotly_font_color = "#0f172a"
 
-# DYNAMIC ADAPTIVE DESIGN SYSTEM CSS
+# DYNAMIC ADAPTIVE DESIGN SYSTEM CSS FOR ALL BUTTONS, CARDS, CONTROLS & GRAPH LABELS
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
@@ -138,19 +140,88 @@ st.markdown(f"""
         box-sizing: border-box !important;
     }}
 
+    /* Base Typography Colors */
     p, span, label, div, h1, h2, h3, h4, h5, h6 {{
-        color: {text_main} !important;
+        color: {text_main};
         word-wrap: break-word !important;
     }}
 
-    [data-testid="stWidgetLabel"] p,
-    [data-testid="stWidgetLabel"] span,
-    label p, label span {{
-        color: {text_main} !important;
+    /* Streamlit Buttons & Link Buttons */
+    .stButton > button, 
+    [data-testid="stLinkButton"] > a,
+    button[kind="primary"],
+    button[kind="secondary"] {{
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        border: 1px solid #2563eb !important;
+        border-radius: 8px !important;
         font-weight: 700 !important;
-        font-size: 0.85rem !important;
+        padding: 6px 14px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    
+    .stButton > button p, 
+    .stButton > button span,
+    [data-testid="stLinkButton"] > a p,
+    [data-testid="stLinkButton"] > a span {{
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }}
 
+    .stButton > button:hover, 
+    [data-testid="stLinkButton"] > a:hover {{
+        background-color: #1d4ed8 !important;
+        border-color: #1d4ed8 !important;
+        color: #ffffff !important;
+    }}
+
+    /* Streamlit Selectbox Controls & Menus */
+    [data-baseweb="select"] > div {{
+        background-color: {bg_card} !important;
+        border-color: {border_card} !important;
+        color: {text_main} !important;
+    }}
+
+    [data-baseweb="select"] p,
+    [data-baseweb="select"] span,
+    [data-baseweb="select"] div {{
+        color: {text_main} !important;
+    }}
+
+    [data-baseweb="popover"],
+    [data-baseweb="menu"],
+    [role="listbox"] {{
+        background-color: {bg_card} !important;
+        border: 1px solid {border_card} !important;
+    }}
+
+    [data-baseweb="menu"] li p,
+    [data-baseweb="menu"] li span,
+    [role="option"] p,
+    [role="option"] span {{
+        color: {text_main} !important;
+    }}
+
+    /* Radio Button Labels & Options */
+    [data-testid="stRadioButton"] label p,
+    [data-testid="stRadioButton"] label span {{
+        color: {text_main} !important;
+        font-weight: 700 !important;
+    }}
+
+    /* Slider Labels & Tick Marks */
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stWidgetLabel"] span,
+    [data-testid="stSlider"] label p,
+    [data-testid="stSlider"] label span,
+    [data-testid="stTickBar"] div,
+    [data-baseweb="slider"] div {{
+        color: {text_main} !important;
+        font-weight: 700 !important;
+    }}
+
+    /* Streamlit Metric Cards */
     [data-testid="stMetric"] {{
         background: {bg_card} !important;
         border: 1.5px solid {border_card} !important;
@@ -176,6 +247,7 @@ st.markdown(f"""
         font-weight: 800 !important;
     }}
 
+    /* Navigation Tabs */
     [data-baseweb="tab-list"] {{
         gap: 6px !important;
         background-color: transparent !important;
@@ -211,6 +283,25 @@ st.markdown(f"""
     [aria-selected="true"] p, button[role="tab"][aria-selected="true"] p {{
         color: #ffffff !important;
         font-weight: 800 !important;
+    }}
+
+    /* Expanders & Dataframe Tables */
+    [data-testid="stExpander"] {{
+        background-color: {bg_card} !important;
+        border: 1px solid {border_card} !important;
+        border-radius: 8px !important;
+    }}
+
+    [data-testid="stExpander"] summary p,
+    [data-testid="stExpander"] summary span {{
+        color: {text_main} !important;
+        font-weight: 700 !important;
+    }}
+
+    [data-testid="stDataFrame"], .stDataFrame {{
+        background-color: {bg_card} !important;
+        border: 1px solid {border_card} !important;
+        border-radius: 8px !important;
     }}
 
     .bms-card {{
@@ -370,7 +461,8 @@ with tab_cells:
                 fig_v.update_layout(
                     template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
                     legend_title_text="", uirevision='constant', transition={'duration': 0},
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=plotly_font_color)
                 )
                 st.plotly_chart(fig_v, use_container_width=True, key="chart_cell_v_sync")
                 
@@ -393,7 +485,8 @@ with tab_cells:
                 fig_donut.update_layout(
                     template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
                     uirevision='constant', transition={'duration': 0},
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color=plotly_font_color)
                 )
                 st.plotly_chart(fig_donut, use_container_width=True, key="chart_pack_voltage_gauge")
 
@@ -469,7 +562,8 @@ with tab_physics:
         )
         fig_sim_cells.update_layout(
             template=plotly_template, height=230, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-            coloraxis_showscale=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+            coloraxis_showscale=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=plotly_font_color)
         )
         st.plotly_chart(fig_sim_cells, use_container_width=True, key="chart_sim_cell_voltages")
 
@@ -486,7 +580,8 @@ with tab_physics:
         )
         fig_sim_heat.update_layout(
             template=plotly_template, height=230, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=plotly_font_color)
         )
         st.plotly_chart(fig_sim_heat, use_container_width=True, key="chart_sim_thermal_balance")
 
@@ -554,7 +649,8 @@ with tab_ai:
             fig_scatter.update_layout(
                 template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
                 uirevision='constant', transition={'duration': 0},
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color=plotly_font_color)
             )
             st.plotly_chart(fig_scatter, use_container_width=True, key="chart_thermal_radar_scatter")
             
@@ -636,7 +732,8 @@ with tab_forecast:
         fig_area.update_layout(
             template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
             uirevision='constant', transition={'duration': 0},
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=plotly_font_color)
         )
         fig_area.update_traces(hovertemplate="<b>Cycle %{x}</b> (~Day %{customdata[0]})<br>Predicted SoH: <b>%{y}%</b>")
         st.plotly_chart(fig_area, use_container_width=True, key="chart_capacity_decay_area")
