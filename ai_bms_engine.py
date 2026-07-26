@@ -116,6 +116,19 @@ class EVBatteryAI:
         
         return df_forecast, meta
 
+    def select_optimal_cooling_mode(self, temp_c, ambient_temp=25.0):
+        """
+        AI Autonomous Thermal Controller:
+        Monitors cell temperature and ambient conditions to dynamically select optimal cooling mode.
+        """
+        effective_temp = max(temp_c, ambient_temp)
+        if effective_temp >= 45.0:
+            return "liquid", "💧 Active Liquid Cooling (82% Heat Removal)", f"HIGH TEMP ({effective_temp:.1f}°C) • Liquid Cooling 100% Flow Active"
+        elif effective_temp >= 32.0:
+            return "air", "🌀 Forced Air Fan Cooling (48% Heat Removal)", f"MODERATE TEMP ({effective_temp:.1f}°C) • Forced Air Fan Active"
+        else:
+            return "none", "🛑 Passive Convection (12% Heat Removal)", f"NOMINAL TEMP ({effective_temp:.1f}°C) • Energy Saver Passive Mode"
+
 if __name__ == "__main__":
     ai = EVBatteryAI()
     sample_pkt = {'cell_v1': 3.7, 'cell_v2': 3.7, 'cell_v3': 3.7, 'cell_v4': 3.2, 'temp_c': 64.5, 'int_resistance_mOhm': 24.5}

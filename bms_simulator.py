@@ -1,6 +1,7 @@
 import time
 import json
 import random
+import math
 from datetime import datetime
 import database as db
 from bms_simulation import BatteryPackSimulator
@@ -39,16 +40,24 @@ def run_bms_simulator(interval_sec=1, max_loops=None):
     pack_id = "EV_PACK_MODEL3_01"
     loop_count = 0
     
+    time_step = 0.0
+    prev_current = -25.0
+    
     try:
         while True:
-            # Simulate driving discharge current (-40A to -10A) with occasional high current draw
-            current_draw = -25.0 + random.uniform(-15.0, 10.0)
+            time_step += 0.08
+            # Smooth driving load profile (acceleration, cruising, coasting)
+            target_current = -28.0 + 15.0 * math.sin(time_step * 0.4)
+            
+            # Low-pass filter for smooth waveform transitions
+            current_draw = round(0.92 * prev_current + 0.08 * target_current, 2)
+            prev_current = current_draw
             imbalance = 0.0
             
-            # Synthetic Event Injector (5% probability thermal surge or imbalance)
-            if random.random() < 0.05:
-                current_draw = -65.0 # Fast acceleration spike
-                imbalance = 0.8
+            # Synthetic Event Injector (rare 2% acceleration surge)
+            if random.random() < 0.02:
+                current_draw = -58.0
+                imbalance = 0.6
                 
             state = pack_sim.simulate_pack_state(current_a=current_draw, cell_imbalance_factor=imbalance)
             

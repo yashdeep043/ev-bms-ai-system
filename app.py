@@ -93,6 +93,7 @@ if is_dark_mode:
     text_main = "#f8fafc"
     text_sub = "#94a3b8"
     text_card_label = "#cbd5e1"
+    text_optimal = "#4ade80"
     tab_bg = "#172033"
     tab_text = "#cbd5e1"
     tab_hover_bg = "#2a3754"
@@ -104,8 +105,9 @@ else:
     border_card = "#cbd5e1"
     text_title = "#0f172a"
     text_main = "#0f172a"
-    text_sub = "#64748b"
+    text_sub = "#475569"
     text_card_label = "#475569"
+    text_optimal = "#16a34a"
     tab_bg = "#ffffff"
     tab_text = "#334155"
     tab_hover_bg = "#eff6ff"
@@ -408,11 +410,11 @@ def render_top_metrics():
         with m2:
             st.markdown(f'<div class="bms-card"><div class="bms-card-label">Pack Current</div><div class="bms-card-val" style="color:{"#f87171" if latest["pack_current_a"]<-40 else ("#60a5fa" if is_dark_mode else "#2563eb")};">{latest["pack_current_a"]} A</div></div>', unsafe_allow_html=True)
         with m3:
-            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Cell Temperature</div><div class="bms-card-val" style="color:{"#f87171" if latest["temp_c"]>50 else "#4ade80"};">{latest["temp_c"]} °C</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="bms-card"><div class="bms-card-label">Cell Temperature</div><div class="bms-card-val" style="color:{"#f87171" if latest["temp_c"]>50 else text_optimal};">{latest["temp_c"]} °C</div></div>', unsafe_allow_html=True)
         with m4:
             st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Charge</div><div class="bms-card-val" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["soc_pct"]} %</div></div>', unsafe_allow_html=True)
         with m5:
-            st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Health</div><div class="bms-card-val" style="color:#4ade80;">{latest["soh_pct"]} %</div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="bms-card"><div class="bms-card-label">State of Health</div><div class="bms-card-val" style="color:{text_optimal};">{latest["soh_pct"]} %</div></div>', unsafe_allow_html=True)
 
 render_top_metrics()
 
@@ -427,7 +429,7 @@ tab_cells, tab_physics, tab_ai, tab_forecast = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: PHYSICAL 4S CELL GRID (SMOOTH TIME ORDERING)
+# TAB 1: PHYSICAL 4S CELL GRID (HIGH CONTRAST & SMOOTH WAVES)
 # ---------------------------------------------------------
 with tab_cells:
     @st.fragment(run_every=run_interval)
@@ -439,14 +441,14 @@ with tab_cells:
             
             c1, c2, c3, c4 = st.columns(4)
             with c1:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #1</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v1"]} V</div><p style="font-size:0.75rem; font-weight:700; color:#4ade80; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #1</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v1"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c2:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #2</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v2"]} V</div><p style="font-size:0.75rem; font-weight:700; color:#4ade80; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #2</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v2"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c3:
-                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #3</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v3"]} V</div><p style="font-size:0.75rem; font-weight:700; color:#4ade80; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card"><div class="cell-num">CELL #3</div><div class="cell-volts" style="color:{"#60a5fa" if is_dark_mode else "#2563eb"};">{latest["cell_v3"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{text_optimal}; margin:2px 0 0 0;">Optimal 🟢</p></div>', unsafe_allow_html=True)
             with c4:
                 delta = abs(latest["cell_v1"] - latest["cell_v4"])
-                st.markdown(f'<div class="cell-grid-card" style="border-color:{"#ef4444" if delta>0.1 else border_card};"><div class="cell-num">CELL #4</div><div class="cell-volts" style="color:{"#ef4444" if delta>0.1 else ("#60a5fa" if is_dark_mode else "#2563eb")};">{latest["cell_v4"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{"#ef4444" if delta>0.1 else "#4ade80"}; margin:2px 0 0 0;">{"Imbalance 🔴" if delta>0.1 else "Optimal 🟢"}</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="cell-grid-card" style="border-color:{"#ef4444" if delta>0.1 else border_card};"><div class="cell-num">CELL #4</div><div class="cell-volts" style="color:{"#ef4444" if delta>0.1 else ("#60a5fa" if is_dark_mode else "#2563eb")};">{latest["cell_v4"]} V</div><p style="font-size:0.75rem; font-weight:700; color:{"#ef4444" if delta>0.1 else text_optimal}; margin:2px 0 0 0;">{"Imbalance 🔴" if delta>0.1 else "Optimal 🟢"}</p></div>', unsafe_allow_html=True)
                 
             st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
             
@@ -504,23 +506,23 @@ with tab_cells:
     render_tab_cells()
 
 # ---------------------------------------------------------
-# TAB 2: ADVANCED ELECTRO-THERMAL SIMULATOR & COOLING LAB
+# TAB 2: ADVANCED ELECTRO-THERMAL SIMULATOR & COOLING LAB (WITH AI AUTO-COOLING)
 # ---------------------------------------------------------
 with tab_physics:
     st.markdown("##### ⚡ Advanced Electro-Thermal Simulator & Thermal Management Lab")
     
     cool_sel = st.radio(
-        "🧊 Select Active Thermal Management Cooling Mode",
-        ["💧 Active Liquid Cooling (82% Heat Removal)", "🌀 Forced Air Fan Cooling (48% Heat Removal)", "🛑 Passive Convection (12% Heat Removal)"],
-        horizontal=True
+        "🧊 Select Thermal Management Cooling Mode",
+        [
+            "🤖 AI Autonomous Auto-Cooling (Dynamic Temp Tracking)",
+            "💧 Active Liquid Cooling (82% Heat Removal)",
+            "🌀 Forced Air Fan Cooling (48% Heat Removal)",
+            "🛑 Passive Convection (12% Heat Removal)"
+        ],
+        horizontal=True,
+        key="cooling_mode_radio"
     )
-    if "Liquid" in cool_sel:
-        cool_mode = "liquid"
-    elif "Air" in cool_sel:
-        cool_mode = "air"
-    else:
-        cool_mode = "none"
-        
+
     st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
     
     c_s1, c_s2, c_s3 = st.columns(3)
@@ -530,7 +532,22 @@ with tab_physics:
         imb_factor = st.slider("Cell Imbalance Factor", 0.0, 1.0, 0.3, 0.1)
     with c_s3:
         amb_temp = st.slider("Ambient Temp (°C)", -10.0, 50.0, 25.0, 1.0)
+
+    ai_controller_msg = ""
+    if "AI Autonomous" in cool_sel:
+        # Pre-estimate cell temp to select dynamic AI cooling mode
+        est_sim = pack_sim.simulate_pack_state(current_a=curr_draw, ambient_temp=amb_temp, cell_imbalance_factor=imb_factor, cooling_mode="none")
+        cool_mode, mode_name, ai_controller_msg = ai_engine.select_optimal_cooling_mode(temp_c=est_sim['temp_c'], ambient_temp=amb_temp)
+    elif "Liquid" in cool_sel:
+        cool_mode = "liquid"
+    elif "Air" in cool_sel:
+        cool_mode = "air"
+    else:
+        cool_mode = "none"
         
+    if "AI Autonomous" in cool_sel:
+        st.info(f"🤖 **AI Thermal Controller Active**: Dynamically selected **{cool_mode.upper()}** mode — {ai_controller_msg}")
+
     sim_res = BatteryPackSimulator().simulate_pack_state(current_a=curr_draw, ambient_temp=amb_temp, cell_imbalance_factor=imb_factor, cooling_mode=cool_mode)
     
     p1, p2, p3, p4, p5, p6 = st.columns(6)
