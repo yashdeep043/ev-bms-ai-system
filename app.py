@@ -112,7 +112,7 @@ else:
     plotly_template = "plotly_white"
     plotly_font_color = "#0f172a"
 
-# DYNAMIC ADAPTIVE DESIGN SYSTEM CSS FOR ALL BUTTONS, CARDS, CONTROLS & GRAPH LABELS
+# DYNAMIC ADAPTIVE DESIGN SYSTEM CSS FOR CLOUD & LOCAL DEPLOYMENT
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
@@ -140,13 +140,43 @@ st.markdown(f"""
         box-sizing: border-box !important;
     }}
 
-    /* Base Typography Colors */
-    p, span, label, div, h1, h2, h3, h4, h5, h6 {{
-        color: {text_main};
-        word-wrap: break-word !important;
+    /* Target ALL Headings & Titles in Streamlit Markdown & Containers */
+    h1, h2, h3, h4, h5, h6,
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
+    .stMarkdown h4, .stMarkdown h5, .stMarkdown h6,
+    [data-testid="stMarkdownContainer"] h1,
+    [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stMarkdownContainer"] h3,
+    [data-testid="stMarkdownContainer"] h4,
+    [data-testid="stMarkdownContainer"] h5,
+    [data-testid="stMarkdownContainer"] h6 {{
+        color: {text_title} !important;
+        font-weight: 800 !important;
     }}
 
-    /* Streamlit Buttons & Link Buttons */
+    /* Target Paragraphs, Spans, Labels, Captions */
+    .stMarkdown p, .stMarkdown span, .stMarkdown div,
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] span,
+    [data-testid="stCaptionContainer"] p,
+    [data-testid="stCaptionContainer"] span {{
+        color: {text_main} !important;
+    }}
+
+    /* Target Widget Labels (Slider, Toggle, Selectbox, Radio) */
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stWidgetLabel"] span,
+    [data-testid="stSlider"] label p,
+    [data-testid="stSlider"] label span,
+    [data-testid="stTickBar"] div,
+    [data-baseweb="slider"] div,
+    [data-testid="stRadioButton"] label p,
+    [data-testid="stRadioButton"] label span {{
+        color: {text_main} !important;
+        font-weight: 700 !important;
+    }}
+
+    /* Target Buttons & Link Buttons */
     .stButton > button, 
     [data-testid="stLinkButton"] > a,
     button[kind="primary"],
@@ -157,8 +187,7 @@ st.markdown(f"""
         border-radius: 8px !important;
         font-weight: 700 !important;
         padding: 6px 14px !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
-        transition: all 0.2s ease-in-out !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
     }}
     
     .stButton > button p, 
@@ -176,11 +205,34 @@ st.markdown(f"""
         color: #ffffff !important;
     }}
 
-    /* Streamlit Selectbox Controls & Menus */
+    /* Target Metric Cards */
+    [data-testid="stMetric"] {{
+        background: {bg_card} !important;
+        border: 1.5px solid {border_card} !important;
+        border-radius: 10px !important;
+        padding: 8px 10px !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05) !important;
+    }}
+
+    [data-testid="stMetricLabel"] p,
+    [data-testid="stMetricLabel"] span {{
+        color: {text_sub} !important;
+        font-weight: 700 !important;
+        font-size: 0.72rem !important;
+        text-transform: uppercase !important;
+    }}
+
+    [data-testid="stMetricValue"] div,
+    [data-testid="stMetricValue"] span {{
+        color: {text_main} !important;
+        font-size: clamp(1.0rem, 1.3vw, 1.4rem) !important;
+        font-weight: 800 !important;
+    }}
+
+    /* Target Selectbox & Popovers */
     [data-baseweb="select"] > div {{
         background-color: {bg_card} !important;
         border-color: {border_card} !important;
-        color: {text_main} !important;
     }}
 
     [data-baseweb="select"] p,
@@ -203,51 +255,7 @@ st.markdown(f"""
         color: {text_main} !important;
     }}
 
-    /* Radio Button Labels & Options */
-    [data-testid="stRadioButton"] label p,
-    [data-testid="stRadioButton"] label span {{
-        color: {text_main} !important;
-        font-weight: 700 !important;
-    }}
-
-    /* Slider Labels & Tick Marks */
-    [data-testid="stWidgetLabel"] p,
-    [data-testid="stWidgetLabel"] span,
-    [data-testid="stSlider"] label p,
-    [data-testid="stSlider"] label span,
-    [data-testid="stTickBar"] div,
-    [data-baseweb="slider"] div {{
-        color: {text_main} !important;
-        font-weight: 700 !important;
-    }}
-
-    /* Streamlit Metric Cards */
-    [data-testid="stMetric"] {{
-        background: {bg_card} !important;
-        border: 1.5px solid {border_card} !important;
-        border-radius: 10px !important;
-        padding: 8px 10px !important;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05) !important;
-        width: 100% !important;
-    }}
-
-    [data-testid="stMetricLabel"] p,
-    [data-testid="stMetricLabel"] span {{
-        color: {text_sub} !important;
-        font-weight: 700 !important;
-        font-size: 0.72rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.4px !important;
-    }}
-
-    [data-testid="stMetricValue"] div,
-    [data-testid="stMetricValue"] span {{
-        color: {text_main} !important;
-        font-size: clamp(1.0rem, 1.3vw, 1.4rem) !important;
-        font-weight: 800 !important;
-    }}
-
-    /* Navigation Tabs */
+    /* Target Navigation Tabs */
     [data-baseweb="tab-list"] {{
         gap: 6px !important;
         background-color: transparent !important;
@@ -269,11 +277,6 @@ st.markdown(f"""
         font-weight: 700 !important;
         font-size: 0.88rem !important;
     }}
-    
-    [data-baseweb="tab"]:hover, button[role="tab"]:hover {{
-        background-color: {tab_hover_bg} !important;
-        border-color: #3b82f6 !important;
-    }}
 
     [aria-selected="true"], button[role="tab"][aria-selected="true"] {{
         background-color: #2563eb !important;
@@ -285,7 +288,7 @@ st.markdown(f"""
         font-weight: 800 !important;
     }}
 
-    /* Expanders & Dataframe Tables */
+    /* Target Expanders & Dataframe Tables */
     [data-testid="stExpander"] {{
         background-color: {bg_card} !important;
         border: 1px solid {border_card} !important;
@@ -293,7 +296,8 @@ st.markdown(f"""
     }}
 
     [data-testid="stExpander"] summary p,
-    [data-testid="stExpander"] summary span {{
+    [data-testid="stExpander"] summary span,
+    [data-testid="stExpander"] p {{
         color: {text_main} !important;
         font-weight: 700 !important;
     }}
@@ -311,12 +315,11 @@ st.markdown(f"""
         padding: 8px 12px;
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
         margin-bottom: 6px;
-        width: 100%;
     }}
     .bms-card-label {{
         font-size: 0.70rem;
         font-weight: 800;
-        color: {text_sub};
+        color: {text_sub} !important;
         text-transform: uppercase;
     }}
     .bms-card-val {{
@@ -333,12 +336,11 @@ st.markdown(f"""
         padding: 8px 10px;
         text-align: center;
         box-shadow: 0 3px 8px rgba(0,0,0,0.04);
-        width: 100%;
     }}
     .cell-num {{
         font-size: 0.72rem;
         font-weight: 800;
-        color: {text_sub};
+        color: {text_sub} !important;
     }}
     .cell-volts {{
         font-size: clamp(1.0rem, 1.3vw, 1.4rem);
