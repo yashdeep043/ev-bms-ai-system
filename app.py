@@ -306,7 +306,7 @@ with col_h1:
     st.markdown('<p style="color:#64748b; font-weight:600; margin:0; font-size:0.80rem;">Real-Time 4S Li-ion Electro-Thermal Telemetry & AI Safety Analytics</p>', unsafe_allow_html=True)
 
 with col_h2:
-    live_stream = st.toggle("⚡ Live Telemetry", value=True)
+    live_stream = st.toggle("⚡ Live Telemetry", value=True, key="live_stream_toggle")
 
 with col_h3:
     refresh_interval_sec = st.select_slider(
@@ -315,6 +315,7 @@ with col_h3:
         value=1.0,
         format_func=lambda x: f"{x}s ({round(1.0/x, 1)} Hz)",
         disabled=not live_stream,
+        key="telemetry_refresh_rate_slider",
         help="Control live telemetry update speed across all dashboard components."
     )
 
