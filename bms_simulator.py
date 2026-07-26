@@ -96,5 +96,5 @@ def run_bms_simulator(interval_sec=1, max_loops=None):
             client.disconnect()
 
 if __name__ == "__main__":
-    run_bms_simulator(interval_sec=5)
+    run_bms_simulator(interval_sec=0.1)
 
