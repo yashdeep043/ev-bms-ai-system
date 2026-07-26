@@ -99,6 +99,7 @@ if is_dark_mode:
     tab_hover_bg = "#2a3754"
     plotly_template = "plotly_dark"
     plotly_font_color = "#f8fafc"
+    plotly_grid_color = "#2a3754"
 else:
     bg_app = "#f8fafc"
     bg_card = "#ffffff"
@@ -113,6 +114,35 @@ else:
     tab_hover_bg = "#eff6ff"
     plotly_template = "plotly_white"
     plotly_font_color = "#0f172a"
+    plotly_grid_color = "#cbd5e1"
+
+def style_plotly_fig(fig, is_dark, height=270):
+    text_clr = "#0f172a" if not is_dark else "#f8fafc"
+    grid_clr = "#cbd5e1" if not is_dark else "#2a3754"
+    tmpl = "plotly_dark" if is_dark else "plotly_white"
+    
+    fig.update_layout(
+        template=tmpl,
+        height=height,
+        margin={"t": 15, "b": 25, "l": 15, "r": 15},
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color=text_clr, family="Plus Jakarta Sans", size=11),
+        legend=dict(font=dict(color=text_clr, size=11))
+    )
+    fig.update_xaxes(
+        tickfont=dict(color=text_clr, size=10),
+        title_font=dict(color=text_clr, size=11),
+        gridcolor=grid_clr,
+        zerolinecolor=grid_clr
+    )
+    fig.update_yaxes(
+        tickfont=dict(color=text_clr, size=10),
+        title_font=dict(color=text_clr, size=11),
+        gridcolor=grid_clr,
+        zerolinecolor=grid_clr
+    )
+    return fig
 
 # DYNAMIC ADAPTIVE DESIGN SYSTEM CSS FOR CLOUD & LOCAL DEPLOYMENT
 st.markdown(f"""
@@ -238,9 +268,7 @@ st.markdown(f"""
         font-weight: 800 !important;
     }}
 
-    /* --------------------------------------------------------- */
-    /* FOOLPROOF BASEWEB SELECTBOX & DROPDOWN MENU CONTRAST FIX  */
-    /* --------------------------------------------------------- */
+    /* Selectbox Main Box & Dropdown Menu Popover */
     [data-baseweb="select"] > div {{
         background-color: {bg_card} !important;
         border: 1.5px solid {border_card} !important;
@@ -254,7 +282,6 @@ st.markdown(f"""
         font-weight: 700 !important;
     }}
 
-    /* Selectbox Dropdown Menu Popover */
     div[data-baseweb="popover"],
     ul[role="listbox"],
     div[data-baseweb="menu"] {{
@@ -263,7 +290,6 @@ st.markdown(f"""
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
     }}
 
-    /* Individual Unselected Options in Dropdown List */
     div[data-baseweb="popover"] li,
     div[data-baseweb="popover"] [role="option"],
     div[data-baseweb="menu"] li,
@@ -273,7 +299,6 @@ st.markdown(f"""
         color: {text_main} !important;
     }}
 
-    /* Target ALL Option Text Nodes Inside Dropdown Popover */
     div[data-baseweb="popover"] li *,
     div[data-baseweb="popover"] [role="option"] *,
     div[data-baseweb="menu"] li *,
@@ -283,7 +308,6 @@ st.markdown(f"""
         font-weight: 700 !important;
     }}
 
-    /* Hovered Option Item */
     div[data-baseweb="popover"] li:hover,
     div[data-baseweb="popover"] [role="option"]:hover,
     ul[role="listbox"] li:hover,
@@ -298,7 +322,6 @@ st.markdown(f"""
         color: #2563eb !important;
     }}
 
-    /* Selected Option Item */
     div[data-baseweb="popover"] [aria-selected="true"],
     ul[role="listbox"] [aria-selected="true"] {{
         background-color: #2563eb !important;
@@ -507,19 +530,14 @@ with tab_cells:
             g1, g2 = st.columns([2, 1])
             with g1:
                 st.markdown("###### 📈 Cell Voltage Sync Waves (V1 - V4)")
-                # SORT ASCENDING CHRONOLOGICALLY TO PREVENT VERTICAL SPIKE JITTER
                 df_plot = df_telemetry.sort_values(by='id', ascending=True)
                 fig_v = px.line(
                     df_plot, x='timestamp', y=['cell_v1', 'cell_v2', 'cell_v3', 'cell_v4'],
                     color_discrete_sequence=['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'],
                     labels={'cell_v1': 'Cell #1', 'cell_v2': 'Cell #2', 'cell_v3': 'Cell #3', 'cell_v4': 'Cell #4'}
                 )
-                fig_v.update_layout(
-                    template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-                    legend_title_text="", uirevision='constant', transition={'duration': 0},
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=plotly_font_color)
-                )
+                fig_v = style_plotly_fig(fig_v, is_dark_mode, height=270)
+                fig_v.update_layout(legend_title_text="", uirevision='constant', transition={'duration': 0})
                 st.plotly_chart(fig_v, use_container_width=True, key="chart_cell_v_sync")
                 
             with g2:
@@ -538,12 +556,8 @@ with tab_cells:
                         ]
                     }
                 ))
-                fig_donut.update_layout(
-                    template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-                    uirevision='constant', transition={'duration': 0},
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color=plotly_font_color)
-                )
+                fig_donut = style_plotly_fig(fig_donut, is_dark_mode, height=270)
+                fig_donut.update_layout(uirevision='constant', transition={'duration': 0})
                 st.plotly_chart(fig_donut, use_container_width=True, key="chart_pack_voltage_gauge")
 
             with st.expander("📋 View Real-Time Telemetry Stream Table (Latest Packets First)"):
@@ -626,11 +640,8 @@ with tab_physics:
             color_continuous_scale=['#ef4444', '#3b82f6', '#22c55e'],
             range_y=[2.5, 4.3]
         )
-        fig_sim_cells.update_layout(
-            template=plotly_template, height=200, margin={"t": 15, "b": 25, "l": 10, "r": 10},
-            coloraxis_showscale=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color=plotly_font_color)
-        )
+        fig_sim_cells = style_plotly_fig(fig_sim_cells, is_dark_mode, height=200)
+        fig_sim_cells.update_layout(coloraxis_showscale=False)
         st.plotly_chart(fig_sim_cells, use_container_width=True, key="chart_sim_cell_voltages")
 
     with col_sim_g2:
@@ -644,11 +655,8 @@ with tab_physics:
             thermal_df, x='Thermal Component', y='Power (Watts)', color='Category',
             color_discrete_map={'Gen': '#ef4444', 'Cool': '#3b82f6', 'Net': '#f59e0b'}
         )
-        fig_sim_heat.update_layout(
-            template=plotly_template, height=200, margin={"t": 15, "b": 25, "l": 10, "r": 10},
-            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color=plotly_font_color)
-        )
+        fig_sim_heat = style_plotly_fig(fig_sim_heat, is_dark_mode, height=200)
+        fig_sim_heat.update_layout(showlegend=False)
         st.plotly_chart(fig_sim_heat, use_container_width=True, key="chart_sim_thermal_balance")
 
 # ---------------------------------------------------------
@@ -712,12 +720,8 @@ with tab_ai:
                 color_discrete_map={'NORMAL': '#22c55e', 'THERMAL_WARNING': '#ef4444', 'CELL_IMBALANCE': '#f59e0b'}
             )
             fig_scatter.add_vline(x=60.0, line_dash="dash", line_color="#ef4444", annotation_text="Critical Temp Cutoff (60°C)")
-            fig_scatter.update_layout(
-                template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-                uirevision='constant', transition={'duration': 0},
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color=plotly_font_color)
-            )
+            fig_scatter = style_plotly_fig(fig_scatter, is_dark_mode, height=270)
+            fig_scatter.update_layout(uirevision='constant', transition={'duration': 0})
             st.plotly_chart(fig_scatter, use_container_width=True, key="chart_thermal_radar_scatter")
             
         with col_r2:
@@ -795,12 +799,7 @@ with tab_forecast:
             color_discrete_sequence=['#3b82f6']
         )
         fig_area.add_hline(y=70.0, line_dash="dash", line_color="#ef4444", annotation_text="EOL Cutoff (70%)")
-        fig_area.update_layout(
-            template=plotly_template, height=270, margin={"t": 10, "b": 10, "l": 10, "r": 10},
-            uirevision='constant', transition={'duration': 0},
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color=plotly_font_color)
-        )
+        fig_area = style_plotly_fig(fig_area, is_dark_mode, height=270)
         fig_area.update_traces(hovertemplate="<b>Cycle %{x}</b> (~Day %{customdata[0]})<br>Predicted SoH: <b>%{y}%</b>")
         st.plotly_chart(fig_area, use_container_width=True, key="chart_capacity_decay_area")
         
