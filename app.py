@@ -288,8 +288,23 @@ st.markdown("""
 # Floating Author Signature
 st.markdown('<div class="author-pill"><b> Developed by</b> Yashdeep</div>', unsafe_allow_html=True)
 
+@st.cache_resource
+def start_background_simulator():
+    import threading
+    import subprocess
+    import sys
+    
+    def run_sim():
+        sim_script = os.path.join(os.path.dirname(__file__), "bms_simulator.py")
+        subprocess.run([sys.executable, sim_script])
+        
+    t = threading.Thread(target=run_sim, daemon=True)
+    t.start()
+    return True
+
 def setup_bms_engine():
     db.init_db()
+    start_background_simulator()
     pack_sim = BatteryPackSimulator()
     ai_engine = EVBatteryAI()
     return pack_sim, ai_engine
